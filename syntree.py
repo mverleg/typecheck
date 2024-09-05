@@ -23,6 +23,24 @@ class Add:
     right: Expression
 
 
+@dataclass
+class Sub:
+    left: Expression
+    right: Expression
+
+
+@dataclass
+class Mul:
+    left: Expression
+    right: Expression
+
+
+@dataclass
+class Div:
+    left: Expression
+    right: Expression
+
+
 Literal = IntLiteral | RealLiteral | TextLiteral
 #TODO: change to NumberLiteral and infer the type of number
 
