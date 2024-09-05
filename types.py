@@ -2,15 +2,21 @@ from dataclasses import dataclass
 
 @dataclass
 class Int:
-    default = 0
+    @classmethod
+    def initialize(Cls):
+        return 0
 
 @dataclass
 class Real:
-    default = 0.0
+    @classmethod
+    def initialize(Cls):
+        return 0.0
 
 @dataclass
 class Text:
-    default = None
+    @classmethod
+    def initialize(Cls):
+        return None
 
 
 Type = Int | Real | Text
