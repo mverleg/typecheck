@@ -1,16 +1,17 @@
-
 import typing
-from dataclasses import dataclass
+from enum import Enum
 
 
-@dataclass
-class Scalar:
-    kind: typing.Literal['int', 'real', 'text']
+class Scalar(Enum):
+    Int = 'int'
+    Real = 'real'
+    Text = 'text'
 
 
-Int = Scalar('int')
-Real = Scalar('real')
-Text = Scalar('text')
+Int = Scalar.Int
+Real = Scalar.Real
+Text = Scalar.Text
 
-Type = typing.Union[Int, Real, Text]
+
+Type = typing.Union[Scalar]
 
