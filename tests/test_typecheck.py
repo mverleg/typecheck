@@ -12,6 +12,6 @@ def test_number_addition():
 
 
 def test_string_addition():
-    assert check(Add(IntLiteral(1), TextLiteral('hello'))) == 'invalid Add(Int, Text)'
+    assert check(Add(IntLiteral(1), TextLiteral('hello'))) == 'no variant of Add for arguments (Int, Text)'
 
 

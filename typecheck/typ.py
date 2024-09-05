@@ -7,6 +7,9 @@ class Scalar(Enum):
     Real = 'real'
     Text = 'text'
 
+    def __str__(self):
+        return self.name
+
 
 Int = Scalar.Int
 Real = Scalar.Real
