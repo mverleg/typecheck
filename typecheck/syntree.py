@@ -1,5 +1,6 @@
 
 from __future__ import annotations
+
 from dataclasses import dataclass
 
 
@@ -43,6 +44,7 @@ class Div:
 
 
 Literal = IntLiteral | RealLiteral | TextLiteral
-#TODO: change to NumberLiteral and infer the type of number
+#TODO: change to NumberLiteral and infer the type of number, or make Int assignable to Real
 
-Expression = Add | Literal
+Expression = Add | Sub | Mul | Div | Literal
+

@@ -1,25 +1,16 @@
 
+import typing
 from dataclasses import dataclass
 
 
 @dataclass
-class Int:
-    @classmethod
-    def initialize(cls):
-        return 0
-
-@dataclass
-class Real:
-    @classmethod
-    def initialize(cls):
-        return 0.0
-
-@dataclass
-class Text:
-    @classmethod
-    def initialize(cls):
-        return None
+class Scalar:
+    kind: typing.Literal['int', 'real', 'text']
 
 
-Type = Int | Real | Text
+Int = Scalar('int')
+Real = Scalar('real')
+Text = Scalar('text')
+
+Type = typing.Union[Int, Real, Text]
 
