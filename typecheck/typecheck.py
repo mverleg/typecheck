@@ -36,18 +36,32 @@ def infer(expr: Expression, types: TypeState) -> Type | str:
         if expr.name not in types:
             return f"cannot call function '{expr.name}' because it is not known"
         func = types[expr.name]
+        if len(expr.args) != len(func.params):
+            return (f"cannot call function '{expr.name}' with "
+                    f"{len(expr.args)} args because it expects {len(func.params)}")
+        for nr, (arg, param) in enumerate(zip(expr.args, func.params)):
+            arg_type = infer(arg, types)
+            if not is_assignable(arg_type, param):
+                return (f"cannot call function '{expr.name}' because argument {nr+1} "
+                        f"is of type {arg_type}, while {param} is expected")
         return func.returns
     assert_never(expr)
 
 
 def binary_nr_func(expr, types: TypeState):
+    #TODO @mark: use functions for this
     left_type = infer(expr.left, types)
     right_type = infer(expr.right, types)
-    if left_type == right_type == Int:
+    if is_assignable(left_type, Int) and is_assignable(right_type, Int):
         return Int
-    elif left_type == right_type == Real:
+    if is_assignable(left_type, Real) and is_assignable(right_type, Real):
         return Real
     else:
         return f'no variant of {type(expr).__name__} for arguments ({left_type}, {right_type})'
+
+
+def is_assignable(value_type: Type, target_type: Type):
+    return value_type == target_type
+    #TODO: more fancy
 
 
