@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import List, Type
 
 
 @dataclass
@@ -40,6 +41,18 @@ class Mul:
 class Div:
     left: Expression
     right: Expression
+
+
+@dataclass
+class FuncDecl:
+    params: List[Type]
+    returns: List[Type]
+
+
+@dataclass
+class FuncCall:
+    args: List[Expression]
+    result: List[Expression]
 
 
 Literal = IntLiteral | RealLiteral | TextLiteral

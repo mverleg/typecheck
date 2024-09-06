@@ -18,3 +18,6 @@ def test_string_addition_etc():
     assert check(Div(TextLiteral('hello'), IntLiteral(1))) == 'no variant of Div for arguments (Text, Int)'
 
 
+def test_function_call():
+    assert False
+

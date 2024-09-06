@@ -1,4 +1,7 @@
-import typing
+from __future__ import annotations
+
+from typing import List, Union
+from dataclasses import dataclass
 from enum import Enum
 
 
@@ -11,10 +14,16 @@ class Scalar(Enum):
         return self.name
 
 
+@dataclass
+class Function(Enum):
+    args: List[Type]
+    result: List[Type]
+
+
 Int = Scalar.Int
 Real = Scalar.Real
 Text = Scalar.Text
 
 
-Type = typing.Union[Scalar]
+Type = Union[Scalar]
 
