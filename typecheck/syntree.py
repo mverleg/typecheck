@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import List
 
-from typecheck.typ import Type
+from typecheck.typ import Type, Int, Real
 
 
 @dataclass
@@ -21,28 +22,44 @@ class TextLiteral:
     value: str
 
 
-@dataclass
-class Add:
-    left: Expression
-    right: Expression
+class BinaryMathKind(Enum):
+    Add = 'Add'
+    Sub = 'Sub'
+    Mul = 'Mul'
+    Div = 'Div'
 
 
 @dataclass
-class Sub:
+class BinaryMathOp:
+    kind: BinaryMathKind
     left: Expression
     right: Expression
 
+    @classmethod
+    def add(cls, left: Expression, right: Expression) -> BinaryMathOp:
+        return BinaryMathOp(BinaryMathKind.Add, left, right)
 
-@dataclass
-class Mul:
-    left: Expression
-    right: Expression
+    @classmethod
+    def sub(cls, left: Expression, right: Expression) -> BinaryMathOp:
+        return BinaryMathOp(BinaryMathKind.Sub, left, right)
 
+    @classmethod
+    def mul(cls, left: Expression, right: Expression) -> BinaryMathOp:
+        return BinaryMathOp(BinaryMathKind.Mul, left, right)
 
-@dataclass
-class Div:
-    left: Expression
-    right: Expression
+    @classmethod
+    def div(cls, left: Expression, right: Expression) -> BinaryMathOp:
+        return BinaryMathOp(BinaryMathKind.Div, left, right)
+
+    def as_func_call(self) -> FuncCall:
+        return FuncCall(self.__class__.__name__, [self.left, self.right])
+
+    @classmethod
+    def as_func_decls(cls) -> List[FuncDecl]:
+        return [
+            FuncDecl(cls.__name__, [Int, Int,], Int,),
+            FuncDecl(cls.__name__, [Real, Real,], Real,),
+        ]
 
 
 @dataclass
@@ -61,7 +78,7 @@ class FuncCall:
 Literal = IntLiteral | RealLiteral | TextLiteral
 #TODO: change to NumberLiteral and infer the type of number, or make Int assignable to Real
 
-Expression = Add | Sub | Mul | Div | Literal | FuncCall
+Expression = BinaryMathOp | Literal | FuncCall
 
 Statement = FuncDecl | Expression
 # todo perhaps FuncDecl will be an expression too later
