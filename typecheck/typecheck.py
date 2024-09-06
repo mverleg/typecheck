@@ -17,7 +17,6 @@ def check(prog: List[Statement]) -> Type | str:
             if stmt.name in types:
                 return f"function name '{stmt.name}' already declared"
             types[stmt.name] = stmt
-            last = Null  # todo or just ignore?
         else:
             infer_type = infer(stmt, types)
             if isinstance(infer_type, str):
@@ -37,7 +36,7 @@ def infer(expr: Expression, types: TypeState) -> Type | str:
         return binary_nr_func(expr, types)
     elif isinstance(expr, FuncCall):
         if expr.name not in types:
-            return f"cannot call function '{expr.name}' because it is not known"
+            return f"cannot call function '{expr.name}' because no such function is known"
         func = types[expr.name]
         if len(expr.args) != len(func.params):
             return (f"cannot call function '{expr.name}' with "
@@ -65,6 +64,5 @@ def binary_nr_func(expr, types: TypeState):
 
 def is_assignable(value_type: Type, target_type: Type):
     return value_type == target_type
-    #TODO: more fancy
 
 

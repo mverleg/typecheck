@@ -1,6 +1,6 @@
 from typecheck.syntree import Add, Sub, Mul, Div, IntLiteral, TextLiteral, FuncDecl, FuncCall, RealLiteral
-from typecheck.typ import Int, Real, Null
-from typecheck.typecheck import check, infer
+from typecheck.typ import Int, Real, Null, Text
+from typecheck.typecheck import check
 
 
 def test_empty_program():
@@ -27,7 +27,40 @@ def test_function_call_valid():
         FuncDecl('add_r', [Real, Real,], Real),
         FuncCall('add_r', [RealLiteral(1), RealLiteral(2),]),
         FuncCall('add_i', [IntLiteral(1), IntLiteral(2),]),
-    ]) is Int
+    ]) == Int
 
-#TODO @mark: test call before declare
+
+def test_function_call_wrong_name():
+    assert check([
+        FuncDecl('f', [Int,], Null),
+        FuncCall('g', [RealLiteral(1),]),
+    ]) == "cannot call function 'g' because no such function is known"
+
+
+def test_function_call_is_not_func():
+    #TODO @mark: impl variables or other named things first
+    pass
+
+
+def test_function_call_wrong_arg_cnt():
+    assert check([
+        FuncDecl('f', [Int, Int,], Null),
+        FuncCall('f', [RealLiteral(1),]),
+    ]) == "cannot call function 'f' with 1 args because it expects 2"
+    assert check([
+        FuncDecl('f', [], Null),
+        FuncCall('f', [RealLiteral(1),]),
+    ]) == "cannot call function 'f' with 1 args because it expects 0"
+
+
+def test_function_call_wrong_arg_type():
+    assert check([
+        FuncDecl('f', [Int,], Null),
+        FuncCall('f', [RealLiteral(1),]),
+    ]) == "cannot call function 'f' because argument 1 is of type Real, while Int is expected"
+    assert check([
+        FuncDecl('f', [Int, Text,], Null),
+        FuncCall('f', [IntLiteral(1), IntLiteral(1),]),
+    ]) == "cannot call function 'f' because argument 2 is of type Int, while Text is expected"
+
 

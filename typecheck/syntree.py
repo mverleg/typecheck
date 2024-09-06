@@ -3,8 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from mypyc.ir.func_ir import FuncDecl
-
 from typecheck.typ import Type
 
 
