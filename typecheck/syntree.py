@@ -51,19 +51,19 @@ class Div:
 class FuncDecl:
     name: str
     params: List[Type]
-    returns: List[Type]
+    returns: Type
 
 
 @dataclass
 class FuncCall:
+    name: str
     args: List[Expression]
-    result: List[Expression]
 
 
 Literal = IntLiteral | RealLiteral | TextLiteral
 #TODO: change to NumberLiteral and infer the type of number, or make Int assignable to Real
 
-Expression = Add | Sub | Mul | Div | Literal
+Expression = Add | Sub | Mul | Div | Literal | FuncCall
 
 Statement = FuncDecl | Expression
 # todo perhaps FuncDecl will be an expression too later
