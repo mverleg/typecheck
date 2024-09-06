@@ -1,5 +1,5 @@
-from typecheck.syntree import Add, Sub, Mul, Div, IntLiteral, TextLiteral
-from typecheck.typ import Int
+from typecheck.syntree import Add, Sub, Mul, Div, IntLiteral, TextLiteral, FuncDecl
+from typecheck.typ import Int, Real
 from typecheck.typecheck import check
 
 
@@ -19,5 +19,5 @@ def test_string_addition_etc():
 
 
 def test_function_call():
-    assert False
-
+    FuncDecl('addi', [Int, Int,], [Int,])
+    FuncDecl('addr', [Real, Real,], [Real,])

@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Type
+from typing import List
+
+from mypyc.ir.func_ir import FuncDecl
+
+from typecheck.typ import Type
 
 
 @dataclass
@@ -45,6 +49,7 @@ class Div:
 
 @dataclass
 class FuncDecl:
+    name: str
     params: List[Type]
     returns: List[Type]
 
@@ -59,4 +64,7 @@ Literal = IntLiteral | RealLiteral | TextLiteral
 #TODO: change to NumberLiteral and infer the type of number, or make Int assignable to Real
 
 Expression = Add | Sub | Mul | Div | Literal
+
+Statement = FuncDecl | Expression
+# todo perhaps FuncDecl will be an expression too later
 

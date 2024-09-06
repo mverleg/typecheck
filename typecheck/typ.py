@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import List, Union
 from dataclasses import dataclass
 from enum import Enum
+from typing import List, Union
 
 
 class Scalar(Enum):
