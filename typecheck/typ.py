@@ -6,6 +6,7 @@ from typing import List, Union
 
 
 class Scalar(Enum):
+    Null = 'null'   # todo maybe temporary
     Int = 'int'
     Real = 'real'
     Text = 'text'
@@ -20,6 +21,7 @@ class Function(Enum):
     result: List[Type]
 
 
+Null = Scalar.Null
 Int = Scalar.Int
 Real = Scalar.Real
 Text = Scalar.Text

@@ -4,23 +4,26 @@ from typing_extensions import assert_never
 
 from typecheck.syntree import IntLiteral, Add, Sub, Mul, Div, RealLiteral, TextLiteral, Statement, FuncDecl, Expression, \
     FuncCall
-from typecheck.typ import Type, Int, Real, Text
-
+from typecheck.typ import Type, Int, Real, Text, Null
 
 TypeState = Dict[str, FuncDecl]
 
 
-def check(prog: List[Statement]) -> None | str:
+def check(prog: List[Statement]) -> Type | str:
     types: TypeState = {}
+    last: Type = Null
     for stmt in prog:
         if isinstance(stmt, FuncDecl):
             if stmt.name in types:
                 return f"function name '{stmt.name}' already declared"
             types[stmt.name] = stmt
+            last = Null  # todo or just ignore?
         else:
             infer_type = infer(stmt, types)
             if isinstance(infer_type, str):
                 return infer_type
+            last = infer_type
+    return last
 
 
 def infer(expr: Expression, types: TypeState) -> Type | str:
