@@ -1,4 +1,5 @@
-from typecheck.syntree import IntLiteral, TextLiteral, FuncDecl, FuncCall, RealLiteral, BinaryMathOp as BOp
+from typecheck.syntree import IntLiteral, TextLiteral, FuncDecl, FuncCall, RealLiteral, BinaryMathOp as BOp, Assignment, \
+    ReadVar
 from typecheck.typ import Int, Real, Null, Text
 from typecheck.typecheck import check
 
@@ -38,8 +39,10 @@ def test_function_call_wrong_name():
 
 
 def test_function_call_is_not_func():
-    #TODO @mark: impl variables or other named things first
-    pass
+    assert check([
+        Assignment('a', RealLiteral(1)),
+        FuncCall('a', [RealLiteral(1),]),
+    ]) == "cannot call 'a' because it is not a function"
 
 
 def test_function_call_wrong_arg_cnt():
@@ -63,4 +66,26 @@ def test_function_call_wrong_arg_type():
         FuncCall('f', [IntLiteral(1), IntLiteral(1),]),
     ]) == "cannot call function 'f' because argument 2 is of type Int, while Text is expected"
 
+
+def test_assign_and_read():
+    assert check([
+        Assignment('a', RealLiteral(1)),
+        ReadVar('a'),
+    ]) == Real
+
+
+def test_reassign_same_type():
+    assert check([
+        Assignment('a', RealLiteral(1)),
+        Assignment('a', RealLiteral(2)),
+        ReadVar('a'),
+    ]) == Real
+
+
+def test_reassign_different_type():
+    assert check([
+        Assignment('a', RealLiteral(1)),
+        Assignment('a', TextLiteral("word")),
+        ReadVar('a'),
+    ]) == "type err"
 

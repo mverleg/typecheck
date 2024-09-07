@@ -8,6 +8,17 @@ from typecheck.typ import Type, Int, Real
 
 
 @dataclass
+class Assignment:
+    name: str
+    value: Expression
+
+
+@dataclass
+class ReadVar:
+    name: str
+
+
+@dataclass
 class IntLiteral:
     value: int
 
@@ -78,8 +89,8 @@ class FuncCall:
 Literal = IntLiteral | RealLiteral | TextLiteral
 #TODO: change to NumberLiteral and infer the type of number, or make Int assignable to Real
 
-Expression = BinaryMathOp | Literal | FuncCall
+Expression = BinaryMathOp | Literal | FuncCall | ReadVar
 
-Statement = FuncDecl | Expression
+Statement = FuncDecl | Assignment | Expression
 # todo perhaps FuncDecl will be an expression too later
 
