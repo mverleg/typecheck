@@ -1,12 +1,20 @@
+from dataclasses import dataclass
 from typing import List, Dict
 
 from typing_extensions import assert_never
 
 from typecheck.syntree import IntLiteral, RealLiteral, TextLiteral, Statement, FuncDecl, Expression, \
-    FuncCall, BinaryMathOp
+    FuncCall, BinaryMathOp, ReadVar
 from typecheck.typ import Type, Int, Real, Text, Null
 
-TypeState = Dict[str, FuncDecl]
+
+@dataclass
+class Var:
+    bound: Type
+    #TODO @mark: does type bound need to be different from Type
+
+
+TypeState = Dict[str, FuncDecl | Var]
 
 
 def check(prog: List[Statement]) -> Type | str:
@@ -32,6 +40,13 @@ def infer(expr: Expression, types: TypeState) -> Type | str:
         return Real
     elif isinstance(expr, TextLiteral):
         return Text
+    elif isinstance(expr, ReadVar):
+        if not expr.name in types:
+            return f"variable not found '{expr.name}'"
+        target = types[expr.name]
+        if not isinstance(target, Var):
+            return f"tried to read '{expr.name}' but it is not a variable (it does exist)"
+        return target.bound
     elif isinstance(expr, BinaryMathOp):
         func_call = expr.as_func_call()
         for func_decl in expr.as_func_decls():
