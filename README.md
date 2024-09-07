@@ -22,6 +22,7 @@
 * Interfaces/traits
 * Closures (capture)
 * Generics
+* Scopes
 
 
 Propagate type info backwards more, i.e.

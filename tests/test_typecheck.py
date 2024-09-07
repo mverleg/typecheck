@@ -116,6 +116,17 @@ def test_redeclare_same_var_incompatible():
     ]) == 'redeclared / type error'
 
 
+def test_redeclare_func_as_var():
+    assert check([
+        FuncDecl('q', [Int,], Real),
+        Assignment('q', Int, IntLiteral(1)),
+    ]) == 'redeclared'
+    assert check([
+        Assignment('q', Int, IntLiteral(1)),
+        FuncDecl('q', [Int,], Real),
+    ]) == 'redeclared'
+
+
 def test_reassign_same_type():
     assert check([
         Assignment('a', None, RealLiteral(1)),

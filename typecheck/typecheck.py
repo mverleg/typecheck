@@ -4,7 +4,7 @@ from typing import List, Dict
 from typing_extensions import assert_never
 
 from typecheck.syntree import IntLiteral, RealLiteral, TextLiteral, Statement, FuncDecl, Expression, \
-    FuncCall, BinaryMathOp, ReadVar
+    FuncCall, BinaryMathOp, ReadVar, Assignment
 from typecheck.typ import Type, Int, Real, Text, Null
 
 
@@ -25,6 +25,10 @@ def check(prog: List[Statement]) -> Type | str:
             if stmt.name in types:
                 return f"function name '{stmt.name}' already declared"
             types[stmt.name] = stmt
+        if isinstance(stmt, Assignment):
+            if stmt.name in types:
+                return f"variable '{stmt.name}' already declared"
+            types[stmt.name] = Var(stmt.typ)
         else:
             infer_type = infer(stmt, types)
             if isinstance(infer_type, str):
