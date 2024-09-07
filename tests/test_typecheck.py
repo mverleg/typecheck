@@ -89,3 +89,26 @@ def test_reassign_different_type():
         ReadVar('a'),
     ]) == "type err"
 
+
+def test_assignment_is_not_variable():
+    assert check([
+        FuncDecl('f', [Int,], Null),
+        Assignment('f', RealLiteral(1)),
+        ReadVar('a'),
+    ]) == "type err"
+
+
+def test_assign_function_result():
+    assert check([
+        FuncDecl('f', [Int,], Real),
+        Assignment('a', FuncCall('f', [IntLiteral(1)])),
+        ReadVar('a')
+    ]) == Int
+
+
+def test_call_function_with_variable_args():
+    assert check([
+        FuncDecl('f', [Int,], Real),
+        Assignment('a', RealLiteral(1)),
+        FuncCall('f', [ReadVar('a')]),
+    ]) == Real
