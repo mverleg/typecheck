@@ -10,6 +10,8 @@ from typecheck.typ import Type, Int, Real
 @dataclass
 class Assignment:
     name: str
+    # typ=None means infer (it could be a reassignment)
+    # if type is given then it must be declaration of a new var
     typ: Type | None
     value: Expression
 

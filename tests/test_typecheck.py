@@ -102,6 +102,20 @@ def test_assign_to_self():
     ]) == Int
 
 
+def test_redeclare_same_var_compatible():
+    assert check([
+        Assignment('a', Int, IntLiteral(1)),
+        Assignment('a', Int, IntLiteral(1)),
+    ]) == 'redeclared'
+
+
+def test_redeclare_same_var_incompatible():
+    assert check([
+        Assignment('a', Int, IntLiteral(1)),
+        Assignment('a', Real, RealLiteral(1)),
+    ]) == 'redeclared / type error'
+
+
 def test_reassign_same_type():
     assert check([
         Assignment('a', None, RealLiteral(1)),
