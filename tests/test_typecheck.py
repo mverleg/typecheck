@@ -1,5 +1,5 @@
-from typecheck.syntree import IntLiteral, TextLiteral, FuncDecl, FuncCall, RealLiteral, BinaryMathOp as BOp, Assignment, \
-    ReadVar
+from typecheck.syntree import BinaryMathOp as BOp, Assignment, ReadVar, BinaryMathOp
+from typecheck.syntree import IntLiteral, TextLiteral, FuncDecl, FuncCall, RealLiteral
 from typecheck.typ import Int, Real, Null, Text
 from typecheck.typecheck import check
 
@@ -40,7 +40,7 @@ def test_function_call_wrong_name():
 
 def test_function_call_is_not_func():
     assert check([
-        Assignment('a', RealLiteral(1)),
+        Assignment('a', None, RealLiteral(1)),
         FuncCall('a', [RealLiteral(1),]),
     ]) == "cannot call 'a' because it is not a function"
 
@@ -67,25 +67,53 @@ def test_function_call_wrong_arg_type():
     ]) == "cannot call function 'f' because argument 2 is of type Int, while Text is expected"
 
 
-def test_assign_and_read():
+def test_assign_and_read_infer():
     assert check([
-        Assignment('a', RealLiteral(1)),
+        Assignment('a', None, RealLiteral(1)),
         ReadVar('a'),
     ]) == Real
 
 
+def test_assign_and_read_declared():
+    assert check([
+        Assignment('a', Real, RealLiteral(1)),
+        ReadVar('a'),
+    ]) == Real
+
+
+def test_assign_wrong_type():
+    assert check([
+        Assignment('a', Text, RealLiteral(1)),
+    ]) == 'type err'
+
+
+def test_assign_and_read_different_type():
+    assert check([
+        Assignment('a', None, RealLiteral(1)),
+        Assignment('b', Text, ReadVar('a')),
+    ]) == 'type err'
+
+
+def test_assign_to_self():
+    assert check([
+        Assignment('a', None, IntLiteral(1)),
+        Assignment('a', None, ReadVar('a')),
+        BOp.add(ReadVar('a'), ReadVar('a')),
+    ]) == Int
+
+
 def test_reassign_same_type():
     assert check([
-        Assignment('a', RealLiteral(1)),
-        Assignment('a', RealLiteral(2)),
+        Assignment('a', None, RealLiteral(1)),
+        Assignment('a', None, RealLiteral(2)),
         ReadVar('a'),
     ]) == Real
 
 
 def test_reassign_different_type():
     assert check([
-        Assignment('a', RealLiteral(1)),
-        Assignment('a', TextLiteral("word")),
+        Assignment('a', None, RealLiteral(1)),
+        Assignment('a', None, TextLiteral("word")),
         ReadVar('a'),
     ]) == "type err"
 
@@ -93,22 +121,32 @@ def test_reassign_different_type():
 def test_assignment_is_not_variable():
     assert check([
         FuncDecl('f', [Int,], Null),
-        Assignment('f', RealLiteral(1)),
+        Assignment('f', None, RealLiteral(1)),
         ReadVar('a'),
     ]) == "type err"
 
 
-def test_assign_function_result():
+def test_assign_function_result_infer():
     assert check([
         FuncDecl('f', [Int,], Real),
-        Assignment('a', FuncCall('f', [IntLiteral(1)])),
+        Assignment('a', None, FuncCall('f', [IntLiteral(1)])),
         ReadVar('a')
-    ]) == Int
+    ]) == Real
+
+
+def test_assign_function_result_declared():
+    assert check([
+        FuncDecl('f', [Int,], Real),
+        Assignment('a', Real, FuncCall('f', [IntLiteral(1)])),
+        ReadVar('a')
+    ]) == Real
 
 
 def test_call_function_with_variable_args():
     assert check([
         FuncDecl('f', [Int,], Real),
-        Assignment('a', RealLiteral(1)),
+        Assignment('a', None, RealLiteral(1)),
         FuncCall('f', [ReadVar('a')]),
     ]) == Real
+
+

@@ -10,6 +10,7 @@ from typecheck.typ import Type, Int, Real
 @dataclass
 class Assignment:
     name: str
+    typ: Type | None
     value: Expression
 
 
