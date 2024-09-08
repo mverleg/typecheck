@@ -81,6 +81,21 @@ def test_assign_and_read_declared():
     ]) == Real
 
 
+def test_backpropagate_type_assignment():
+    assert check([
+        Assignment('a', Text, TextLiteral('hi')),
+        Assignment('b', Text, ReadVar('a')),
+        Assignment('c', Text, ReadVar('b')),
+        ReadVar('a'),
+    ]) == Text
+
+
+def test_declare_self_ref():
+    assert check([
+        Assignment('a', Text, ReadVar('a')),
+    ]) == "no 'a'"
+
+
 def test_assign_wrong_type():
     assert check([
         Assignment('a', Text, RealLiteral(1)),
