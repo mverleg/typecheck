@@ -68,7 +68,10 @@ def infer(expr: Expression, types: TypeState) -> Type | str:
     elif isinstance(expr, FuncCall):
         if expr.name not in types:
             return f"cannot call function '{expr.name}' because no such function is known"
-        return infer_func_call(expr, types[expr.name], types)
+        func = types[expr.name]
+        if not isinstance(func, FuncDecl):
+            return f"cannot call '{expr.name}' because it is a {type(func).__name__}, not a function"
+        return infer_func_call(expr, func, types)
     assert_never(expr)
 
 
