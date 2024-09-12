@@ -184,7 +184,7 @@ def test_assign_function_result_declared():
 
 def test_call_function_with_variable_args():
     assert check([
-        FuncDecl('f', [Int,], Real),
+        FuncDecl('f', [Real,], Real),
         Assignment('a', None, RealLiteral(1)),
         FuncCall('f', [ReadVar('a')]),
     ]) == Real
