@@ -28,7 +28,10 @@ def check(prog: List[Statement]) -> Type | str:
         elif isinstance(stmt, Assignment):
             if stmt.name in types:
                 return f"variable '{stmt.name}' already declared"
-            types[stmt.name] = Var(stmt.typ)
+            typ = stmt.typ
+            if typ is None:
+                typ = infer(stmt.value, types)
+            types[stmt.name] = Var(typ)
         else:
             infer_type = infer(stmt, types)
             if isinstance(infer_type, str):

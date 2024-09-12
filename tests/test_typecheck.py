@@ -42,7 +42,7 @@ def test_function_call_is_not_func():
     assert check([
         Assignment('a', None, RealLiteral(1)),
         FuncCall('a', [RealLiteral(1),]),
-    ]) == "cannot call 'a' because it is not a function"
+    ]) == "cannot call 'a' because it is a Var, not a function"
 
 
 def test_function_call_wrong_arg_cnt():
