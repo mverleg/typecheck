@@ -1,4 +1,4 @@
-from typecheck.syntree import BinaryMathOp as BOp, Assignment, ReadVar, BinaryMathOp
+from typecheck.syntree import BinaryMathOp as BOp, Assignment, ReadVar
 from typecheck.syntree import IntLiteral, TextLiteral, FuncDecl, FuncCall, RealLiteral
 from typecheck.typ import Int, Real, Null, Text
 from typecheck.typecheck import check

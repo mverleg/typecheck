@@ -5,7 +5,7 @@ from typing_extensions import assert_never
 
 from typecheck.syntree import IntLiteral, RealLiteral, TextLiteral, Statement, FuncDecl, Expression, \
     FuncCall, BinaryMathOp, ReadVar, Assignment
-from typecheck.typ import Type, Int, Real, Text, Null
+from typecheck.typ import Type, Int, Real, Text, Null, Scalar
 
 
 @dataclass
@@ -25,7 +25,7 @@ def check(prog: List[Statement]) -> Type | str:
             if stmt.name in types:
                 return f"function name '{stmt.name}' already declared"
             types[stmt.name] = stmt
-        if isinstance(stmt, Assignment):
+        elif isinstance(stmt, Assignment):
             if stmt.name in types:
                 return f"variable '{stmt.name}' already declared"
             types[stmt.name] = Var(stmt.typ)
@@ -38,6 +38,9 @@ def check(prog: List[Statement]) -> Type | str:
 
 
 def infer(expr: Expression, types: TypeState) -> Type | str:
+    # if expr in list(Scalar):
+    #     return expr
+    #TODO @mark: TEMPORARY! REMOVE THIS!
     if isinstance(expr, IntLiteral):
         return Int
     elif isinstance(expr, RealLiteral):
