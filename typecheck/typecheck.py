@@ -23,14 +23,25 @@ def check(prog: List[Statement]) -> Type | str:
     for stmt in prog:
         if isinstance(stmt, FuncDecl):
             if stmt.name in types:
-                return f"function name '{stmt.name}' already declared"
+                return f"function name '{stmt.name}' already declared (as {type(types[stmt.name]).__name__})"
             types[stmt.name] = stmt
         elif isinstance(stmt, Assignment):
-            if stmt.name in types:
-                return f"variable '{stmt.name}' already declared"
             typ = stmt.typ
             if typ is None:
                 typ = infer(stmt.value, types)
+                if isinstance(typ, str):
+                    return typ
+            if stmt.name in types:
+                existing = types[stmt.name]
+                if not isinstance(existing, Var):
+                    return f"variable name '{stmt.name}' already declared (as {type(types[stmt.name]).__name__})"
+                if stmt.typ is not None:
+                    return (f"variable '{stmt.name}' cannot be declared because it is already declared (as "
+                            f"{type(existing).__name__}) (interpreting as declaration because of type "
+                            f"annotation {stmt.typ.__name__})")
+                if not is_assignable(existing.bound, typ):
+                    return (f'variable {stmt.name} has type {existing.bound.__name__} but is being assigned an '
+                            f'expression of type {typ.__name__}, which is not compatible')
             types[stmt.name] = Var(typ)
         else:
             infer_type = infer(stmt, types)

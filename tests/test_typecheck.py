@@ -135,11 +135,11 @@ def test_redeclare_func_as_var():
     assert check([
         FuncDecl('q', [Int,], Real),
         Assignment('q', Int, IntLiteral(1)),
-    ]) == 'redeclared'
+    ]) == "variable 'q' already declared (as FuncDecl)"
     assert check([
         Assignment('q', Int, IntLiteral(1)),
         FuncDecl('q', [Int,], Real),
-    ]) == 'redeclared'
+    ]) == "function name 'q' already declared (as Var)"
 
 
 def test_reassign_same_type():
