@@ -11,7 +11,7 @@ class Scalar(Enum):
     Real = 'real'
     Text = 'text'
 
-    def type_name(self):
+    def type_name(self) -> str:
         return self.value
 
 
@@ -20,7 +20,7 @@ class Function:
     args: List[Type]
     result: Type
 
-    def type_name(self):
+    def type_name(self) -> str:
         return "fun({}) -> {}".format(','.join(arg.type_name() for arg in self.args), self.result.type_name())
 
 

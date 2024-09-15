@@ -13,6 +13,8 @@ class Var:
     bound: Type
     #TODO @mark: does type bound need to be different from Type
 
+    def type_name(self) -> str:
+        return 'variable'
 
 TypeState = Dict[str, FuncDecl | Var]
 
@@ -77,7 +79,7 @@ def infer(expr: Expression, types: TypeState) -> Type | str:
             return f"cannot call function '{expr.name}' because no such function is known"
         func = types[expr.name]
         if not isinstance(func, FuncDecl):
-            return f"cannot call '{expr.name}' because it is a {type(func).__name__}, not a function"
+            return f"cannot call '{expr.name}' because it is a {func.type_name()}, not a function"
         return infer_func_call(expr, func, types)
     assert_never(expr)
 
@@ -88,10 +90,10 @@ def infer_func_call(func_call: FuncCall, func_decl: FuncDecl, types: TypeState, 
     if len(func_call.args) != len(func_decl.params):
         return (f"cannot call function '{func_call.name}' with "
                 f"{len(func_call.args)} args because it expects {len(func_decl.params)}")
-    for nr, (arg_type, param) in enumerate(zip(actual_arg_types, func_decl.params)):
-        if not is_assignable(arg_type, param):
+    for nr, (arg_type, param_type) in enumerate(zip(actual_arg_types, func_decl.params)):
+        if not is_assignable(arg_type, param_type):
             return (f"cannot call function '{func_call.name}' because argument {nr + 1} "
-                    f"is of type {arg_type}, while {param} is expected")
+                    f"is of type {arg_type.type_name()}, while {param_type.type_name()} is expected")
     return func_decl.returns
 
 

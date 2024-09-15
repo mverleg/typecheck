@@ -44,7 +44,7 @@ def test_function_call_is_not_func():
     assert check([
         Assignment('a', None, RealLiteral(1)),
         FuncCall('a', [RealLiteral(1),]),
-    ]) == "cannot call 'a' because it is a Var, not a function"
+    ]) == "cannot call 'a' because it is a variable, not a function"
 
 
 def test_function_call_wrong_arg_cnt():
@@ -62,11 +62,11 @@ def test_function_call_wrong_arg_type():
     assert check([
         FuncDecl('f', [Int,], Null),
         FuncCall('f', [RealLiteral(1),]),
-    ]) == "cannot call function 'f' because argument 1 is of type Real, while Int is expected"
+    ]) == "cannot call function 'f' because argument 1 is of type real, while int is expected"
     assert check([
         FuncDecl('f', [Int, Text,], Null),
         FuncCall('f', [IntLiteral(1), IntLiteral(1),]),
-    ]) == "cannot call function 'f' because argument 2 is of type Int, while Text is expected"
+    ]) == "cannot call function 'f' because argument 2 is of type int, while text is expected"
 
 
 def test_assign_and_read_infer():
