@@ -17,11 +17,11 @@ class Scalar(Enum):
 
 @dataclass
 class Function:
-    args: List[Type]
+    params: List[Type]
     result: Type
 
     def type_name(self) -> str:
-        return "fun({}) -> {}".format(','.join(arg.type_name() for arg in self.args), self.result.type_name())
+        return "fun({}) -> {}".format(','.join(arg.type_name() for arg in self.params), self.result.type_name())
 
 
 Null = Scalar.Null

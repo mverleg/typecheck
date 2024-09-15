@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List
 
-from typecheck.typ import Type, Int, Real
+from typecheck.typ import Type, Int, Real, Function
 
 
 @dataclass
@@ -68,10 +68,10 @@ class BinaryMathOp:
     def as_func_call(self) -> FuncCall:
         return FuncCall(self.kind.value, [self.left, self.right])
 
-    def as_func_decls(self) -> List[FuncDecl]:
+    def as_func_types(self) -> List[Function]:
         return [
-            FuncDecl(self.kind.value, [Int, Int,], Int,),
-            FuncDecl(self.kind.value, [Real, Real,], Real,),
+            Function([Int, Int,], Int,),
+            Function([Real, Real,], Real,),
         ]
 
 

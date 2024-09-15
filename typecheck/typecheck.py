@@ -11,9 +11,11 @@ from typecheck.typ import Type, Int, Real, Text, Null, Function
 @dataclass
 class Var:
     bound: Type
+    mutable: bool
+    #TODO @mark: just reassignment for now ^
 
     def type_name(self) -> str:
-        return 'variable'
+        raise Exception("do not use")   #TODO @mark: TEMPORARY! REMOVE THIS!
 
 
 TypeState = Dict[str, Var]
@@ -27,7 +29,7 @@ def check(prog: List[Statement]) -> Type | str:
             if stmt.name in types:
                 return f"function name '{stmt.name}' already declared (as {type(types[stmt.name]).__name__})"
             func_type = Function(stmt.params, stmt.returns)
-            types[stmt.name] = Var(func_type)
+            types[stmt.name] = Var(func_type, mutable=False)
         elif isinstance(stmt, Assignment):
             declared_typ = stmt.typ
             infer_typ = infer(stmt.value, types)
@@ -39,7 +41,7 @@ def check(prog: List[Statement]) -> Type | str:
                 type_res = infer_declaration(stmt, declared_typ, infer_typ)
             if isinstance(type_res, str):
                 return type_res
-            types[stmt.name] = Var(type_res)
+            types[stmt.name] = Var(type_res, mutable=True)
         else:
             infer_type = infer(stmt, types)
             if isinstance(infer_type, str):
@@ -67,21 +69,21 @@ def infer(expr: Expression, types: TypeState) -> Type | str:
         return target.bound
     elif isinstance(expr, BinaryMathOp):
         func_call = expr.as_func_call()
-        equivalent_functions = expr.as_func_decls()
+        equivalent_functions = expr.as_func_types()
         return infer_func_call_overloads(func_call, equivalent_functions, types)
     elif isinstance(expr, FuncCall):
         if expr.name not in types:
             return f"cannot call function '{expr.name}' because no such function is known"
-        func = types[expr.name]
-        if not isinstance(func, FuncDecl):
-            return f"cannot call '{expr.name}' because it is a {func.type_name()}, not a function"
-        return infer_func_call(expr, func, types)
+        func_type = types[expr.name].bound
+        if not isinstance(func_type, Function):
+            return f"cannot call '{expr.name}' because it is a {func_type.type_name()}, not a function"
+        return infer_func_call(expr, func_type, types)
     assert_never(expr)
 
 
-def infer_reassignment(assignment: Assignment, declared_typ: Type | None, infer_typ: Type, known_binding: BindingKind) -> Type | str:
-    if not isinstance(known_binding, Var):
-        return f"cannot assign variable '{assignment.name}' because it is already a '{known_binding.type_name()}'"
+def infer_reassignment(assignment: Assignment, declared_typ: Type | None, infer_typ: Type, known_binding: Var) -> Type | str:
+    if not known_binding.mutable:
+        return f"cannot assign variable '{assignment.name}' because it is not mutable"
     existing_type = known_binding.bound
     if declared_typ is not None:
         return (f"variable '{assignment.name}' cannot be declared because it is already declared (as variable of type '{existing_type.type_name()}') "
@@ -102,30 +104,30 @@ def infer_declaration(declaration: Assignment, declared_typ: Type | None, infer_
     return declared_typ
 
 
-def infer_func_call(func_call: FuncCall, func_decl: FuncDecl, types: TypeState, actual_arg_types: List[Type] = None) -> Type | str:
+def infer_func_call(func_call: FuncCall, func_type: Function, types: TypeState, actual_arg_types: List[Type] = None) -> Type | str:
     # #TODO @mark: problem if `infer` updates `types` but we select another overload
     actual_arg_types = actual_arg_types or [infer(arg, types) for arg in func_call.args]
-    if len(func_call.args) != len(func_decl.params):
+    if len(func_call.args) != len(func_type.params):
         return (f"cannot call function '{func_call.name}' with "
-                f"{len(func_call.args)} args because it expects {len(func_decl.params)}")
-    for nr, (arg_type, param_type) in enumerate(zip(actual_arg_types, func_decl.params)):
+                f"{len(func_call.args)} args because it expects {len(func_type.params)}")
+    for nr, (arg_type, param_type) in enumerate(zip(actual_arg_types, func_type.params)):
         if not is_assignable(arg_type, param_type):
             return (f"cannot call function '{func_call.name}' because argument {nr + 1} "
                     f"is of type {arg_type.type_name()}, while {param_type.type_name()} is expected")
-    return func_decl.returns
+    return func_type.result
 
 
-def infer_func_call_overloads(func_call: FuncCall, func_decls: List[FuncDecl], types: TypeState) -> Type | str:
-    assert len(func_decls) >= 1
+def infer_func_call_overloads(func_call: FuncCall, func_types: List[Function], types: TypeState) -> Type | str:
+    assert len(func_types) >= 1
     # #TODO @mark: problem if `infer` updates `types` but we select another overload [same as infer_func_call]
     actual_arg_types = [infer(arg, types) for arg in func_call.args]
-    for func_decl in func_decls:
-        res = infer_func_call(func_call, func_decl, types, actual_arg_types=actual_arg_types)
+    for func_type in func_types:
+        res = infer_func_call(func_call, func_type, types, actual_arg_types=actual_arg_types)
         if isinstance(res, str):
             continue
         #TODO @mark: probably should return func_decl later
         return res
-    return f"none of {len(func_decls)} variants of '{func_call.name}' accept argument of types ({', '.join(arg.type_name() for arg in actual_arg_types)})"
+    return f"none of {len(func_types)} variants of '{func_call.name}' accept argument of types ({', '.join(arg.type_name() for arg in actual_arg_types)})"
 
 
 def is_assignable(value_type: Type, target_type: Type):
