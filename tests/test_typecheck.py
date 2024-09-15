@@ -136,11 +136,12 @@ def test_redeclare_func_as_var():
     assert check([
         FuncDecl('q', [Int,], Real),
         Assignment('q', Int, IntLiteral(1)),
-    ]) == "variable 'q' already declared (as FuncDecl)"
+    ]) == ("variable 'q' cannot be declared because it is already declared (as variable of type 'fun(int) -> real') "
+           "(interpreting as declaration because of 'int' type annotation)")
     assert check([
         Assignment('q', Int, IntLiteral(1)),
         FuncDecl('q', [Int,], Real),
-    ]) == "function name 'q' already declared (as Var)"
+    ]) == "function name 'q' already declared (as int)"
 
 
 def test_reassign_same_type():
@@ -156,7 +157,8 @@ def test_reassign_different_type():
         Assignment('a', None, RealLiteral(1)),
         Assignment('a', None, TextLiteral("word")),
         ReadVar('a'),
-    ]) == "type err"
+    ]) == ("cannot assign expression of type 'text' to variable 'a' because its "
+           "previously declared or inferred type should be 'real'")
 
 
 def test_assignment_is_not_variable():
@@ -164,7 +166,7 @@ def test_assignment_is_not_variable():
         FuncDecl('f', [Int,], Null),
         Assignment('f', None, RealLiteral(1)),
         ReadVar('a'),
-    ]) == "type err"
+    ]) == "cannot assign variable 'f' because it is not mutable"
 
 
 def test_assign_function_result_infer():

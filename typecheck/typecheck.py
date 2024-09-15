@@ -27,7 +27,7 @@ def check(prog: List[Statement]) -> Type | str:
     for stmt in prog:
         if isinstance(stmt, FuncDecl):
             if stmt.name in types:
-                return f"function name '{stmt.name}' already declared (as {type(types[stmt.name]).__name__})"
+                return f"function name '{stmt.name}' already declared (as {types[stmt.name].bound.type_name()})"
             func_type = Function(stmt.params, stmt.returns)
             types[stmt.name] = Var(func_type, mutable=False)
         elif isinstance(stmt, Assignment):
@@ -82,12 +82,12 @@ def infer(expr: Expression, types: TypeState) -> Type | str:
 
 
 def infer_reassignment(assignment: Assignment, declared_typ: Type | None, infer_typ: Type, known_binding: Var) -> Type | str:
-    if not known_binding.mutable:
-        return f"cannot assign variable '{assignment.name}' because it is not mutable"
     existing_type = known_binding.bound
     if declared_typ is not None:
         return (f"variable '{assignment.name}' cannot be declared because it is already declared (as variable of type '{existing_type.type_name()}') "
                 f"(interpreting as declaration because of '{assignment.typ.type_name()}' type annotation)")
+    if not known_binding.mutable:
+        return f"cannot assign variable '{assignment.name}' because it is not mutable"
     if not is_assignable(existing_type, infer_typ):
         #TODO @mark: if existing type was inferred, then maybe it can be widened? (but not if it's declared or was passed to somewhere)
         return (f"cannot assign expression of type '{infer_typ.type_name()}' to variable '{assignment.name}' "
