@@ -11,14 +11,17 @@ class Scalar(Enum):
     Real = 'real'
     Text = 'text'
 
-    def __str__(self):
-        return self.name
+    def type_name(self):
+        return self.value
 
 
 @dataclass
-class Function(Enum):
+class Function:
     args: List[Type]
-    result: List[Type]
+    result: Type
+
+    def type_name(self):
+        return "fun({}) -> {}".format(','.join(arg.type_name() for arg in self.args), self.result.type_name())
 
 
 Null = Scalar.Null

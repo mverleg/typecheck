@@ -7,8 +7,10 @@ from typecheck.typecheck import check
 def test_empty_program():
     assert check([]) == Null
 
+
 def test_number_literal():
     assert check([IntLiteral(1)]) == Int
+    assert check([IntLiteral(1)]).type_name() == 'int'
 
 
 def test_number_addition():
@@ -16,10 +18,10 @@ def test_number_addition():
 
 
 def test_string_addition_etc():
-    assert check([BOp.add(IntLiteral(1), TextLiteral('hello'))]) == 'no variant of Add for arguments (Int, Text)'
-    assert check([BOp.sub(TextLiteral('hello'), IntLiteral(1))]) == 'no variant of Sub for arguments (Text, Int)'
-    assert check([BOp.mul(IntLiteral(1), TextLiteral('hello'))]) == 'no variant of Mul for arguments (Int, Text)'
-    assert check([BOp.div(TextLiteral('hello'), IntLiteral(1))]) == 'no variant of Div for arguments (Text, Int)'
+    assert check([BOp.add(IntLiteral(1), TextLiteral('hello'))]) == 'no variant of Add for arguments (int, text)'
+    assert check([BOp.sub(TextLiteral('hello'), IntLiteral(1))]) == 'no variant of Sub for arguments (text, int)'
+    assert check([BOp.mul(IntLiteral(1), TextLiteral('hello'))]) == 'no variant of Mul for arguments (int, text)'
+    assert check([BOp.div(TextLiteral('hello'), IntLiteral(1))]) == 'no variant of Div for arguments (text, int)'
 
 
 def test_function_call_valid():
