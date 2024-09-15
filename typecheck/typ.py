@@ -30,5 +30,5 @@ Real = Scalar.Real
 Text = Scalar.Text
 
 
-Type = Union[Scalar]
+Type = Scalar | Function
 

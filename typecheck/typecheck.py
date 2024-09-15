@@ -5,20 +5,18 @@ from typing_extensions import assert_never
 
 from typecheck.syntree import IntLiteral, RealLiteral, TextLiteral, Statement, FuncDecl, Expression, \
     FuncCall, BinaryMathOp, ReadVar, Assignment
-from typecheck.typ import Type, Int, Real, Text, Null
+from typecheck.typ import Type, Int, Real, Text, Null, Function
 
 
 @dataclass
 class Var:
     bound: Type
-    #TODO @mark: does type bound need to be different from Type
 
     def type_name(self) -> str:
         return 'variable'
 
 
-BindingKind = FuncDecl | Var
-TypeState = Dict[str, BindingKind]
+TypeState = Dict[str, Var]
 
 
 def check(prog: List[Statement]) -> Type | str:
@@ -28,7 +26,8 @@ def check(prog: List[Statement]) -> Type | str:
         if isinstance(stmt, FuncDecl):
             if stmt.name in types:
                 return f"function name '{stmt.name}' already declared (as {type(types[stmt.name]).__name__})"
-            types[stmt.name] = stmt
+            func_type = Function(stmt.params, stmt.returns)
+            types[stmt.name] = Var(func_type)
         elif isinstance(stmt, Assignment):
             declared_typ = stmt.typ
             infer_typ = infer(stmt.value, types)
