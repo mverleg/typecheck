@@ -83,13 +83,29 @@ def test_assign_and_read_declared():
     ]) == Real
 
 
-def test_backpropagate_type_assignment():
+def test_backpropagate_type_assignment_simple():
+    #TODO @mark: actually this just forward propagates because type of 'a' is known
+    # it needs to use some unknowns and sybtyping, e.g. if beginning only knows 'a' is Number, but 'c' is integer
     assert check([
-        Assignment('a', Text, TextLiteral('hi')),
-        Assignment('b', Text, ReadVar('a')),
-        Assignment('c', Text, ReadVar('b')),
+        Assignment('a', None, IntLiteral(1)),
+        Assignment('b', None, ReadVar('a')),
+        FuncDecl('f', [Int,], Real),
+        FuncCall('f', [ReadVar('b')]),
         ReadVar('a'),
-    ]) == Text
+    ]) == Int
+
+
+def test_backpropagate_type_assignment_binop():
+    #TODO @mark: see test_backpropagate_type_assignment_simple ^
+    assert check([
+        Assignment('a', None, IntLiteral(1)),
+        Assignment('b', None, IntLiteral(1)),
+        Assignment('c', None, BOp.add(ReadVar('b'), ReadVar('a'))),
+        Assignment('d', None, BOp.add(ReadVar('a'), ReadVar('c'))),
+        FuncDecl('f', [Int,], Real),
+        FuncCall('f', [ReadVar('d')]),
+        ReadVar('a'),
+    ]) == Int
 
 
 def test_declare_self_ref():
