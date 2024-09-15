@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Dict, Tuple
 
+from mypy.expandtype import expand_type_by_instance
 from mypyc.irbuild.format_str_tokenizer import tokenizer_format_call
 from typing_extensions import assert_never
 
@@ -36,9 +37,9 @@ def check(prog: List[Statement]) -> Type | str:
             if isinstance(infer_typ, str):
                 return infer_typ
             if stmt.name in types:
-                type_res = infer_reassignment(declared_typ, infer_typ, types[stmt.name])
+                type_res = infer_reassignment(stmt, declared_typ, infer_typ, types[stmt.name])
             else:
-                type_res = infer_declaration(declared_typ, infer_typ)
+                type_res = infer_declaration(stmt, declared_typ, infer_typ)
             if isinstance(type_res, str):
                 return type_res
             types[stmt.name] = Var(type_res)
@@ -81,50 +82,26 @@ def infer(expr: Expression, types: TypeState) -> Type | str:
     assert_never(expr)
 
 
-def infer_reassignment(declared_typ: Type | None, infer_typ: Type, known_binding: BindingKind) -> Type | str:
-    if isinstance(declared_typ, Var):
-        return "not var"
-        #TODO @mark:
+def infer_reassignment(assignment: Assignment, declared_typ: Type | None, infer_typ: Type, known_binding: BindingKind) -> Type | str:
+    if not isinstance(declared_typ, Var):
+        return f"cannot assign variable '{assignment.name}' because it is already a '{known_binding.type_name()}'"
+    existing_type = known_binding.bound
     if declared_typ is not None:
-        return f"redeclared"
-        #TODO @mark:
-
-        if is_assignable(declared_typ, infer_typ):
-            return f"wrong type"
-    if declared_typ is None:
-        if known_binding is None:
-            # newly declared
-            pass
-        else:
-            # re-assign
-            pass
-    else:
-        #
-        pass
+        return (f"variable '{assignment.name}' cannot be declared because it is already declared (as variable of type {existing_type.type_name()}) "
+                f"(interpreting as declaration because of type annotation {assignment.typ.type_name()})")
+    if not is_assignable(existing_type, infer_typ):
+        #TODO @mark: if existing type was inferred, then maybe it can be widened? (but not if it's declared or was passed to somewhere)
+        return (f"cannot assign expression of type '{infer_typ.type_name()}' to variable '{assignment.name}' "
+                f"because its previously declared or inferred type should be '{existing_type.type_name()}'")
+    return unify(infer_typ, existing_type)
 
 
-    if stmt.name in types:
-        existing = types[stmt.name]
-    if not isinstance(existing, Var):
-        return f"variable name '{stmt.name}' already declared (as {type(types[stmt.name]).__name__})"
-    if stmt.typ is not None:
-        return (f"variable '{stmt.name}' cannot be declared because it is already declared (as "
-                f"{type(existing).__name__}) (interpreting as declaration because of type "
-                f"annotation {stmt.typ.__name__})")
-    if not is_assignable(existing.bound, typ):
-        return (f'variable {stmt.name} has type {existing.bound.__name__} but is being assigned an '
-                f'expression of type {typ.__name__}, which is not compatible')
-    types[stmt.name] = Var(typ)
-
-
-
-
-def infer_declaration(declared_typ: Type | None, infer_typ: Type):
+def infer_declaration(declaration: Assignment, declared_typ: Type | None, infer_typ: Type):
     if declared_typ is None:
         return infer_typ
     if is_assignable(declared_typ, infer_typ):
-        return f"wrong type"
-        #TODO @mark:
+        return (f"cannot assign expression of type '{infer_typ.type_name()}' to variable '{declaration.name}' "
+                f"because it is not compatible with the declared type '{declared_typ.type_name()}'")
     return declared_typ
 
 
@@ -156,5 +133,10 @@ def infer_func_call_overloads(func_call: FuncCall, func_decls: List[FuncDecl], t
 
 def is_assignable(value_type: Type, target_type: Type):
     return value_type == target_type
+
+
+def unify(first: Type, second: Type):
+    assert first == second
+    return first
 
 
