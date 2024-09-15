@@ -105,7 +105,7 @@ def infer_func_call_overloads(func_call: FuncCall, func_decls: List[FuncDecl], t
             continue
         #TODO @mark: probably should return func_decl later
         return res
-    return f"none of {len(func_decls)} variants of {func_call.name} accept argument of type ({', '.join(arg.type_name() for arg in actual_arg_types)})"
+    return f"none of {len(func_decls)} variants of '{func_call.name}' accept argument of types ({', '.join(arg.type_name() for arg in actual_arg_types)})"
 
 
 def is_assignable(value_type: Type, target_type: Type):

@@ -37,10 +37,10 @@ class TextLiteral:
 
 
 class BinaryMathKind(Enum):
-    Add = 'Add'
-    Sub = 'Sub'
-    Mul = 'Mul'
-    Div = 'Div'
+    Add = 'add'
+    Sub = 'sub'
+    Mul = 'mul'
+    Div = 'div'
 
 
 @dataclass
@@ -66,13 +66,12 @@ class BinaryMathOp:
         return BinaryMathOp(BinaryMathKind.Div, left, right)
 
     def as_func_call(self) -> FuncCall:
-        return FuncCall(self.__class__.__name__, [self.left, self.right])
+        return FuncCall(self.kind.value, [self.left, self.right])
 
-    @classmethod
-    def as_func_decls(cls) -> List[FuncDecl]:
+    def as_func_decls(self) -> List[FuncDecl]:
         return [
-            FuncDecl(cls.__name__, [Int, Int,], Int,),
-            FuncDecl(cls.__name__, [Real, Real,], Real,),
+            FuncDecl(self.kind.value, [Int, Int,], Int,),
+            FuncDecl(self.kind.value, [Real, Real,], Real,),
         ]
 
 
