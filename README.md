@@ -24,6 +24,9 @@
 * Generics
 * Scopes
 
+## Minor
+
+* Should variable names be allowed to be the same as type names in scope?
 
 Propagate type info backwards more, i.e.
     f(a, b):

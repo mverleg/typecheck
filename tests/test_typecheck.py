@@ -101,14 +101,14 @@ def test_declare_self_ref():
 def test_assign_wrong_type():
     assert check([
         Assignment('a', Text, RealLiteral(1)),
-    ]) == 'type err'
+    ]) == "cannot declare 'a' with expression of type 'real', because it is not compatible with the declared type 'text'"
 
 
 def test_assign_and_read_different_type():
     assert check([
         Assignment('a', None, RealLiteral(1)),
         Assignment('b', Text, ReadVar('a')),
-    ]) == 'type err'
+    ]) == "cannot declare 'b' with expression of type 'real', because it is not compatible with the declared type 'text'"
 
 
 def test_assign_to_self():
@@ -119,18 +119,17 @@ def test_assign_to_self():
     ]) == Int
 
 
-def test_redeclare_same_var_compatible():
+def test_redeclare_same_var():
     assert check([
         Assignment('a', Int, IntLiteral(1)),
-        Assignment('a', Int, IntLiteral(1)),
-    ]) == 'redeclared'
-
-
-def test_redeclare_same_var_incompatible():
+        Assignment('a', Int, IntLiteral(1)),  # compatible
+    ]) == ("variable 'a' cannot be declared because it is already declared (as variable of type 'int') "
+           "(interpreting as declaration because of 'int' type annotation)")
     assert check([
         Assignment('a', Int, IntLiteral(1)),
-        Assignment('a', Real, RealLiteral(1)),
-    ]) == 'redeclared / type error'
+        Assignment('a', Real, RealLiteral(1)),  # incompatible
+    ]) == ("variable 'a' cannot be declared because it is already declared (as variable of type 'int') "
+           "(interpreting as declaration because of 'real' type annotation)")
 
 
 def test_redeclare_func_as_var():
