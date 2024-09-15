@@ -95,7 +95,7 @@ def test_backpropagate_type_assignment():
 def test_declare_self_ref():
     assert check([
         Assignment('a', Text, ReadVar('a')),
-    ]) == "no 'a'"
+    ]) == "variable 'a' not found"
 
 
 def test_assign_wrong_type():

@@ -1,13 +1,11 @@
 from dataclasses import dataclass
-from typing import List, Dict, Tuple
+from typing import List, Dict
 
-from mypy.expandtype import expand_type_by_instance
-from mypyc.irbuild.format_str_tokenizer import tokenizer_format_call
 from typing_extensions import assert_never
 
 from typecheck.syntree import IntLiteral, RealLiteral, TextLiteral, Statement, FuncDecl, Expression, \
     FuncCall, BinaryMathOp, ReadVar, Assignment
-from typecheck.typ import Type, Int, Real, Text, Null, Scalar
+from typecheck.typ import Type, Int, Real, Text, Null
 
 
 @dataclass
@@ -63,7 +61,7 @@ def infer(expr: Expression, types: TypeState) -> Type | str:
         return Text
     elif isinstance(expr, ReadVar):
         if not expr.name in types:
-            return f"variable not found '{expr.name}'"
+            return f"variable '{expr.name}' not found"
         target = types[expr.name]
         if not isinstance(target, Var):
             return f"tried to read '{expr.name}' but it is not a variable (it does exist)"
@@ -99,8 +97,8 @@ def infer_reassignment(assignment: Assignment, declared_typ: Type | None, infer_
 def infer_declaration(declaration: Assignment, declared_typ: Type | None, infer_typ: Type):
     if declared_typ is None:
         return infer_typ
-    if is_assignable(declared_typ, infer_typ):
-        return (f"cannot assign expression of type '{infer_typ.type_name()}' to variable '{declaration.name}' "
+    if not is_assignable(declared_typ, infer_typ):
+        return (f"cannot declare '{declaration.name}' with expression of type '{infer_typ.type_name()}', "
                 f"because it is not compatible with the declared type '{declared_typ.type_name()}'")
     return declared_typ
 
