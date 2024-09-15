@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Dict, Tuple
 
+from mypyc.irbuild.format_str_tokenizer import tokenizer_format_call
 from typing_extensions import assert_never
 
 from typecheck.syntree import IntLiteral, RealLiteral, TextLiteral, Statement, FuncDecl, Expression, \
@@ -16,7 +17,9 @@ class Var:
     def type_name(self) -> str:
         return 'variable'
 
-TypeState = Dict[str, FuncDecl | Var]
+
+BindingKind = FuncDecl | Var
+TypeState = Dict[str, BindingKind]
 
 
 def check(prog: List[Statement]) -> Type | str:
@@ -28,23 +31,17 @@ def check(prog: List[Statement]) -> Type | str:
                 return f"function name '{stmt.name}' already declared (as {type(types[stmt.name]).__name__})"
             types[stmt.name] = stmt
         elif isinstance(stmt, Assignment):
-            typ = stmt.typ
-            if typ is None:
-                typ = infer(stmt.value, types)
-                if isinstance(typ, str):
-                    return typ
+            declared_typ = stmt.typ
+            infer_typ = infer(stmt.value, types)
+            if isinstance(infer_typ, str):
+                return infer_typ
             if stmt.name in types:
-                existing = types[stmt.name]
-                if not isinstance(existing, Var):
-                    return f"variable name '{stmt.name}' already declared (as {type(types[stmt.name]).__name__})"
-                if stmt.typ is not None:
-                    return (f"variable '{stmt.name}' cannot be declared because it is already declared (as "
-                            f"{type(existing).__name__}) (interpreting as declaration because of type "
-                            f"annotation {stmt.typ.__name__})")
-                if not is_assignable(existing.bound, typ):
-                    return (f'variable {stmt.name} has type {existing.bound.__name__} but is being assigned an '
-                            f'expression of type {typ.__name__}, which is not compatible')
-            types[stmt.name] = Var(typ)
+                type_res = infer_reassignment(declared_typ, infer_typ, types[stmt.name])
+            else:
+                type_res = infer_declaration(declared_typ, infer_typ)
+            if isinstance(type_res, str):
+                return type_res
+            types[stmt.name] = Var(type_res)
         else:
             infer_type = infer(stmt, types)
             if isinstance(infer_type, str):
@@ -82,6 +79,53 @@ def infer(expr: Expression, types: TypeState) -> Type | str:
             return f"cannot call '{expr.name}' because it is a {func.type_name()}, not a function"
         return infer_func_call(expr, func, types)
     assert_never(expr)
+
+
+def infer_reassignment(declared_typ: Type | None, infer_typ: Type, known_binding: BindingKind) -> Type | str:
+    if isinstance(declared_typ, Var):
+        return "not var"
+        #TODO @mark:
+    if declared_typ is not None:
+        return f"redeclared"
+        #TODO @mark:
+
+        if is_assignable(declared_typ, infer_typ):
+            return f"wrong type"
+    if declared_typ is None:
+        if known_binding is None:
+            # newly declared
+            pass
+        else:
+            # re-assign
+            pass
+    else:
+        #
+        pass
+
+
+    if stmt.name in types:
+        existing = types[stmt.name]
+    if not isinstance(existing, Var):
+        return f"variable name '{stmt.name}' already declared (as {type(types[stmt.name]).__name__})"
+    if stmt.typ is not None:
+        return (f"variable '{stmt.name}' cannot be declared because it is already declared (as "
+                f"{type(existing).__name__}) (interpreting as declaration because of type "
+                f"annotation {stmt.typ.__name__})")
+    if not is_assignable(existing.bound, typ):
+        return (f'variable {stmt.name} has type {existing.bound.__name__} but is being assigned an '
+                f'expression of type {typ.__name__}, which is not compatible')
+    types[stmt.name] = Var(typ)
+
+
+
+
+def infer_declaration(declared_typ: Type | None, infer_typ: Type):
+    if declared_typ is None:
+        return infer_typ
+    if is_assignable(declared_typ, infer_typ):
+        return f"wrong type"
+        #TODO @mark:
+    return declared_typ
 
 
 def infer_func_call(func_call: FuncCall, func_decl: FuncDecl, types: TypeState, actual_arg_types: List[Type] = None) -> Type | str:
