@@ -117,6 +117,7 @@ def infer_func_call(func_call: FuncCall, func_type: Function, types: TypeState, 
     return func_type.result
 
 
+#TODO @mark: this shouldn't really be a function overload, it's a fixed function on a trait that's implemented for different types
 def infer_func_call_overloads(func_call: FuncCall, func_types: List[Function], types: TypeState) -> Type | str:
     assert len(func_types) >= 1
     # #TODO @mark: problem if `infer` updates `types` but we select another overload [same as infer_func_call]
