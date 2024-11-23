@@ -23,16 +23,6 @@
 * Generics
 * Scopes
 
-## Functions
-
-I'd like to have types for things like whether functions can do IO, can throw/panic, are async, 
-yield, allocate, access globals, etc, but I'd like to infer them in most cases. For concrete 
-functions, a function becomes Throws if it calls any function that throws. For type constraints,
-this needs to be a little fancy: calling a generic function without explicit types makes the 
-parent inherit the Throws if and only if the concrete type has it. This requires bounds to be 
-explicit, so won't work behind dynamic dispatch - in such cases it must be explicit instead of
-inferred whether it, e.g., Throws.
-
 ## Minor
 
 * Should variable names be allowed to be the same as type names in scope?
